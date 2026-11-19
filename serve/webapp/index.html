@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SSEStraBed · 层磐</title>
+<!-- 站点图标：必须是 SVG —— 引擎对 /web/ 只服务扁平的 .css/.js/.svg（png/ico 会 404） -->
+<link rel="icon" type="image/svg+xml" href="/logo.svg">
+<!-- 设计系统原样保留（public/ 平铺输出，交给引擎的 /web/ 路由） -->
+<link rel="stylesheet" href="/tokens.css">
+<link rel="stylesheet" href="/components.css">
+<link rel="stylesheet" href="/app.css">
+<script>
+  // 首帧前定主题与界面字体：都用用户上次的选择。字体必须在这里就定下来 ——
+  // 等 Vue 挂载再改的话，页面会先按默认字体画一遍再跳成另一种，闪一下很难看。
+  try {
+    document.documentElement.dataset.theme = localStorage.getItem("strata.theme") ||
+      (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  } catch (e) {}
+  try {
+    const f = JSON.parse(localStorage.getItem("strata.font") || '"tencent"');
+    document.documentElement.dataset.font = ["tencent", "outfit", "system"].includes(f) ? f : "tencent";
+  } catch (e) { document.documentElement.dataset.font = "tencent"; }
+</script>
+</head>
+<body>
+<div id="app"></div>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

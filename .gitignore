@@ -1,0 +1,52 @@
+# builds
+build/
+build-*/
+dist/
+*.o
+*.a
+*.so
+*.dylib
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# node
+node_modules/
+serve/web/
+
+# logs & runtime
+logs/
+*.log
+*.log.*
+*.tmp
+
+# secrets / runtime state (never commit)
+*.env
+active-*.env
+deploy/context.json
+config.local.json
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+
+# data
+data/
+models/
+*.gguf
+*.safetensors
+*.bin
+*.db
+*.sqlite
+
+# editor / os
+.DS_Store
+*.bak
+*.bak-*
+*.bak2-*
+*.pre-*
+*.orig
+*~

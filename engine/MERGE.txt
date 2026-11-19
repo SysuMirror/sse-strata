@@ -1,0 +1,6 @@
+c98ba13 our-fork
+3ab6273 base-0.1.59.1
+base: upstream v0.2.13.1 (engine 0.1.59.1)
+ours: our fork (unified slots + batch multistep MTP + 3 fork flags)
+upstream: main 0.1.61 (2026-11-16)
+merge: 70 conflicts; non-engine -> upstream; engine files resolved by hand

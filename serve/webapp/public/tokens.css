@@ -1,0 +1,120 @@
+/* Strata UI — tokens. Derived from the Gainsty design system.
+   Light is default; dark via <html data-theme="dark">.
+   Values marked (derived) are not in the Gainsty source and were added for the app. */
+
+/* Outfit (SIL Open Font License 1.1, serve/web/fonts/OFL.txt): one variable font, weights 100-900 */
+@font-face{font-family:"Outfit";src:url("../fonts/outfit-latin-wght.woff2") format("woff2-variations");font-weight:100 900;font-display:swap;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Outfit";src:url("../fonts/outfit-latin-ext-wght.woff2") format("woff2-variations");font-weight:100 900;font-display:swap;unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+
+/* TencentSans W7：腾讯官方品牌字体，界面默认字体（原 TTF 8.1MB → WOFF2 3.3MB，见 tools/README）。
+   · 只有 700 一档字重，声明成 100-900 是让浏览器**不要**再合成加粗 —— 否则本来就粗的字会糊成一团；
+   · 全字集 29k 字形（含 20910 个汉字）：模型输出什么字都可能出现，不能做子集化；
+   · font-display:swap：3.3MB 下载期间先用回退字体渲染，不阻塞首屏。 */
+@font-face{font-family:"TencentSans";src:url("../fonts/tencent-sans-w7.woff2") format("woff2");font-weight:100 900;font-style:normal;font-display:swap}
+
+:root{
+  /* type */
+  /* 字体三选一（设置里可改，见 app 的「设置 → 界面字体」）：
+       默认 TencentSans；html[data-font] 覆盖成 Outfit（仅拉丁）或系统默认。
+       三个栈都带 CJK 兜底 —— 只写拉丁字体的话中文会掉到衬线/宋体上，非常难看。 */
+  --st-font-cjk:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Source Han Sans SC","Noto Sans CJK SC","Noto Sans SC";
+  --st-font-sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --st-font:"TencentSans","Outfit",var(--st-font-cjk),var(--st-font-sans);
+  --st-font-mono:ui-monospace,"SF Mono","Cascadia Code",Consolas,"Liberation Mono","Noto Sans Mono CJK SC",monospace; /* (derived) */
+  --st-fs-xs:12px;  --st-fs-sm:13px; --st-fs-md:14px; --st-fs-base:16px;
+  --st-fs-lg:18px;  --st-fs-xl:24px; --st-fs-stat:32px; --st-fs-display:40px;
+  --st-fw-regular:400; --st-fw-medium:500; --st-fw-bold:700; --st-fw-black:900;
+  --st-lh-tight:1.1; --st-lh-body:1.55;
+
+  /* spacing (4pt) */
+  --st-s-1:4px; --st-s-2:8px; --st-s-3:12px; --st-s-4:16px; --st-s-5:20px;
+  --st-s-6:24px; --st-s-8:32px; --st-s-10:40px; --st-s-12:48px; --st-s-16:64px;
+
+  /* radius */
+  --st-r-sm:8px; --st-r-md:14px; --st-r-lg:20px; --st-r-xl:24px; --st-r-pill:9999px;
+
+  /* motion (derived) */
+  --st-ease:cubic-bezier(.2,.7,.2,1); --st-dur:160ms;
+
+  /* color — light */
+  --st-bg:#f9fafb;
+  --st-surface:#ffffff;
+  --st-surface-2:#f7f7f7;
+  --st-line:#dee5ee;
+  --st-line-soft:#eeeeee;
+  --st-ink:#221e1f;
+  --st-ink-soft:#303030;
+  --st-ink-muted:#6f6f6f;        /* Gainsty #7a7a7a darkened slightly for 4.5:1 on white */
+  --st-icon:#2F384C;             /* Anron default */
+
+  /* 主色取自 logo 的蓝（渐变 #1060f8 → #38b0f8 → #58e0f8，主色调 #1a7cf8） */
+  --st-accent:#1a7cf8;
+  --st-accent-hover:#1060d8;
+  --st-accent-ink:#ffffff;
+  --st-accent-tint:#eef4ff;
+  --st-accent-text:#1465d2;      /* accent used as text on light */
+  --st-accent-glow:rgba(26,124,248,.28);   /* (derived) 主色阴影/辉光，按钮与高亮用同一份 */
+
+  /* 图表的分类色（一条线一个通道）。顺序固定、不循环使用。
+     这四色不是随手挑的：相邻两两在红/绿色盲模拟下的 OKLab ΔE、以及各自对底色的对比度，
+     都过了校验脚本（浅色底 #ffffff；深色底 #161a1d 另有一套，见下）。 */
+  --st-chart-1:#1a7cf8; --st-chart-2:#0e9f6e; --st-chart-3:#d97706; --st-chart-4:#c026d3;
+
+  /* 全站背景纹理：细网格 + 疏星点（见 app.css 的 body::before） */
+  --st-grid-line:#e9eff8; --st-star:#c9dcef;
+  --st-focus:#405de6;
+
+  --st-info:#0f97ff;     --st-info-tint:#e8f4ff;    --st-info-text:#0668c2;
+  --st-warn:#e39b0b;     --st-warn-tint:#fff6e0;    --st-warn-text:#8a5a00;   /* (derived) */
+  --st-danger:#e0283f;   --st-danger-tint:#fdecee;  --st-danger-text:#b01a2e; /* (derived) */
+
+  --st-code-bg:#1b1f23;  --st-code-ink:#e6e9ec;  /* code blocks stay dark in both themes (derived) */
+
+  --st-sh-card:0 18px 7px rgba(0,0,0,.01),0 10px 6px rgba(0,0,0,.02),0 4px 4px rgba(0,0,0,.03),0 1px 2px rgba(0,0,0,.04);
+  --st-sh-bar:0 54px 21px rgba(0,0,0,.01),0 30px 18px rgba(0,0,0,.03),0 13px 13px rgba(0,0,0,.05),0 3px 7px rgba(0,0,0,.06);
+  --st-sh-pop:0 10px 40px rgba(15,23,42,.08),0 1px 3px rgba(15,23,42,.06);
+  color-scheme:light;
+}
+
+/* 界面字体三选一。app 启动时按用户设置在 <html> 上打 data-font（见 src/store.js setFont），
+   首帧前由 index.html 里的内联脚本先设好，避免字体闪一下再换。上面的 :root 默认就是腾讯体。 */
+html[data-font="tencent"]{--st-font:"TencentSans","Outfit",var(--st-font-cjk),var(--st-font-sans)}
+html[data-font="outfit"]{--st-font:"Outfit",var(--st-font-cjk),var(--st-font-sans)}
+html[data-font="system"]{--st-font:var(--st-font-sans),var(--st-font-cjk)}
+
+/* color — dark (all derived) */
+[data-theme="dark"]{
+  --st-bg:#0e1113;
+  --st-surface:#161a1d;
+  --st-surface-2:#1d2226;
+  --st-line:#2a3036;
+  --st-line-soft:#22272c;
+  --st-ink:#eef1f3;
+  --st-ink-soft:#c7cdd3;
+  --st-ink-muted:#8e979f;
+  --st-icon:#c7cdd3;
+
+  /* 深色下的主色：把 logo 的蓝提亮一档，压在 #0e1113 上才够清楚 */
+  --st-accent:#3d9bff;
+  --st-accent-hover:#6db4ff;
+  --st-accent-ink:#04182e;
+  --st-accent-tint:rgba(61,155,255,.14);
+  --st-accent-text:#7cc0ff;
+  --st-accent-glow:rgba(61,155,255,.42);   /* (derived) */
+  /* 图表的分类色 —— 同色相、按深色底重新取的步阶（L 落在 0.48–0.67 带内），不是简单翻转 */
+  --st-chart-1:#3a8ee6; --st-chart-2:#0f9d72; --st-chart-3:#bd7a12; --st-chart-4:#bb45c4;
+
+  --st-grid-line:#191f27; --st-star:#3a5773;
+  --st-focus:#7b93ff;
+
+  --st-info:#3aa9ff;     --st-info-tint:rgba(58,169,255,.12);  --st-info-text:#7cc4ff;
+  --st-warn:#f5b53d;     --st-warn-tint:rgba(245,181,61,.12);  --st-warn-text:#f8c96a;
+  --st-danger:#ff5a6e;   --st-danger-tint:rgba(255,90,110,.12);--st-danger-text:#ff8a98;
+
+  --st-code-bg:#0a0c0e;  --st-code-ink:#e6e9ec;
+
+  --st-sh-card:0 1px 2px rgba(0,0,0,.4);
+  --st-sh-bar:0 12px 32px rgba(0,0,0,.45),0 2px 6px rgba(0,0,0,.35);
+  --st-sh-pop:0 16px 48px rgba(0,0,0,.55),0 1px 3px rgba(0,0,0,.4);
+  color-scheme:dark;
+}

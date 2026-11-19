@@ -1,0 +1,22 @@
+{
+ "name": "unified",
+ "home": "/home/cloud/engines/source/strata-unified-0.1.59",
+ "server_py": "/home/cloud/Strata/serve/server.py",
+ "binary": "/home/cloud/engines/source/strata-unified-0.1.59/build/strata",
+ "python": "/home/cloud/Strata/.venv/bin/python",
+ "lanes": {
+  "a": {
+   "port": 8091,
+   "taskset": "0-15",
+   "gpu": 0,
+   "config": "/home/cloud/deploy/engines/profiles/unified/strata-a.json"
+  },
+  "b": {
+   "port": 8092,
+   "taskset": "38-53",
+   "gpu": 1,
+   "config": "/home/cloud/deploy/engines/profiles/unified/strata-b.json"
+  }
+ },
+ "vision_exe": "/home/cloud/Strata/engine/strata-vision"
+}

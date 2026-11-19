@@ -1,0 +1,3 @@
+{"prompt_tokens": 10, "max_tokens": 2112, "body": {"model": "mock", "max_tokens": 2112, "messages": [{"role": "user", "content": "你好"}], "reasoning_budget_tokens": 1408}}
+{"prompt_tokens": 10, "max_tokens": 2112, "body": {"model": "mock", "max_tokens": 2112, "messages": [{"role": "user", "content": "你好"}], "thinking": {"type": "enabled", "budget_tokens": 1024}}}
+{"prompt_tokens": 10, "max_tokens": 2112, "body": {"model": "mock", "max_tokens": 2112, "messages": [{"role": "user", "content": "你好"}], "reasoning_budget_tokens": 900}}

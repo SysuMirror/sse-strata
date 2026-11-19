@@ -1,0 +1,377 @@
+/* Strata web app - layout on top of tokens.css + components.css (the Strata UI kit). Colours, type, radii and
+   shadows come only from the kit's tokens. */
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; overflow: hidden; background: var(--st-bg); }
+/* 全站背景：纯色。之前是 28px 网格 + 三层点阵「星星」——那是典型的生成式模板味道，
+   控制台界面不需要装饰纹理；层级交给 surface / border / 间距来区分。 */
+body::before { display: none; }
+/* 外壳：侧栏 + 主区。整条 flex 链写全（原版没有 #app 规则，靠内容高度撑着，
+   加了固定宽度的侧栏之后必须显式声明，否则侧栏高度会塌成内容高。 */
+#app { flex: 1; min-height: 0; display: flex; position: relative; z-index: 1; }
+/* 外壳是**上下**两块：页头拉通、内容区在下。
+   页头里不放任何「按标签页出现或消失」的东西 —— 否则切标签时整条页头会横向窜动。 */
+/* min-width:0 不能省：它同时是 #app（flex 行）的子项，默认 min-width:auto 会拒绝收缩到
+   内容宽度以下 —— 手机上一算，页头标签行 + 按钮的 min-content 有 498px，
+   于是整页按 498 布局、右边被 body 的 overflow:hidden 裁掉（正文全被切）。 */
+.app { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.app__body { flex: 1; min-width: 0; min-height: 0; display: flex; }
+main { flex: 1; min-width: 0; min-height: 0; display: flex; }
+/* min-width:0 同理不能省：.view 是 main（flex 行）的子项，默认 min-width:auto ——
+   内容里只要有一个不换行的长串（模型输出的 URL / base64 / 长词）或一条不换行的工具条，
+   整页就会按那个 min-content 布局（实测对话页被撑到 752px，页头还是 390px，右边一片空白）。 */
+.view { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.view[hidden] { display: none; }
+.muted { color: var(--st-ink-muted); }
+.small { font-size: var(--st-fs-xs); }
+.card-title { font-weight: var(--st-fw-bold); font-size: var(--st-fs-base); color: var(--st-ink); }
+.st-header { position: relative; z-index: 2; flex: none; }
+.st-header .st-tabs { margin-left: var(--st-s-4); }
+#drawer-close .st-icon { transform: rotate(-90deg); }
+
+/* ---------------------------------------------------------------- chat */
+.chat-scroll { flex: 1; min-height: 0; overflow-y: auto; }
+.chat { max-width: 860px; margin: 0 auto; padding: var(--st-s-8) var(--st-s-6) var(--st-s-6); display: flex;
+        flex-direction: column; gap: var(--st-s-6); }
+.chat-empty { margin: 12vh auto 0; text-align: center; }
+.chat-empty__title { font-weight: var(--st-fw-black); font-size: var(--st-fs-display); line-height: var(--st-lh-tight);
+                     letter-spacing: -.02em; }
+.chat-empty__sub { margin-top: var(--st-s-3); color: var(--st-ink-muted); }
+
+/* 空态的建议问题：两列网格，第三条落在左边一格（和参考的排版一致）。
+   尺寸/描边/圆角全部取自令牌，和卡片是同一套几何。 */
+.chat-suggests { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--st-s-3);
+                 margin: var(--st-s-8) auto 0; max-width: 640px; text-align: left; }
+.chat-suggest { display: flex; align-items: center; gap: var(--st-s-3); min-height: 48px; padding: 10px 14px;
+                border: 1px solid var(--st-line); border-radius: var(--st-r-md); background: var(--st-surface);
+                color: var(--st-ink-soft); font: 400 var(--st-fs-sm)/1.45 var(--st-font); cursor: pointer;
+                box-shadow: var(--st-sh-card);
+                transition: border-color var(--st-dur), background var(--st-dur), color var(--st-dur); }
+.chat-suggest:hover { border-color: var(--st-accent); background: var(--st-accent-tint); color: var(--st-ink); }
+.chat-suggest__text { flex: 1; min-width: 0; }
+/* 「换一批」比建议问题低一档：虚线边、墨色浅，一眼能分出「这是动作、那是内容」 */
+.chat-suggest--more { justify-content: center; gap: var(--st-s-2); border-style: dashed; box-shadow: none;
+                      color: var(--st-ink-muted); font-size: var(--st-fs-xs); }
+.chat-suggest--more:hover { border-color: var(--st-accent); background: var(--st-accent-tint); color: var(--st-accent-text); }
+.chat-suggest__arrow { flex: none; color: var(--st-ink-muted); }
+.chat-suggest:hover .chat-suggest__arrow { color: var(--st-accent-text); }
+
+/* 手机上的「打开会话栏」按钮。默认不存在（桌面用窄轨），只在窄屏出现；
+   所以对话页要给它一个定位上下文。 */
+.view--chat { position: relative; }
+.chat-menu { display: none; }
+@media (max-width: 720px) {
+  .chat-menu { display: inline-flex; align-items: center; justify-content: center; position: absolute;
+               top: 10px; left: 12px; z-index: 5; width: 38px; height: 38px; border-radius: 11px;
+               border: 1px solid var(--st-line); background: var(--st-surface); color: var(--st-ink-muted);
+               cursor: pointer; box-shadow: var(--st-sh-card); }
+  .chat-menu:active { background: var(--st-surface-2); }
+  /* 抽屉开着时按钮被遮罩盖住，点哪儿都是关抽屉 —— 不用额外处理 */
+}
+
+/* 空态：把「标题 + 建议 + 输入框」当成一整块在竖向居中（有消息时输入框照旧沉在底部）。
+   参考站就是这么放的 —— 开屏时视线落在画面正中，而不是浮在顶上。 */
+.view--chat[data-empty] { justify-content: center; }
+.view--chat[data-empty] .chat-scroll { flex: none; }
+.view--chat[data-empty] .chat { padding-top: 0; padding-bottom: var(--st-s-5); }
+.view--chat[data-empty] .chat-empty { margin-top: 0; }
+.view--chat[data-empty] .composer-wrap { padding-bottom: 0; }
+.view--chat[data-empty] .chat,
+.view--chat[data-empty] .st-composer { max-width: 720px; }
+
+.chat-scroll, .composer-wrap { position: relative; z-index: 1; }
+
+/* ---------------------------------------------------------------- 入场动效
+   参考站的做法：元素依次「浮上来」，幅度很小（10px）、时长很短（~420ms）。
+   只做一次入场，不做循环动画 —— 页面在动，但不抢注意力。
+   prefers-reduced-motion 下整套关掉。 */
+@keyframes st-rise { from { opacity: 0; transform: translateY(10px); } }
+@keyframes st-appear { from { opacity: 0; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  .chat-empty__title { animation: st-rise 420ms var(--st-ease) both; }
+  .chat-empty__sub { animation: st-rise 420ms var(--st-ease) 70ms both; }
+  .composer-wrap { animation: st-rise 460ms var(--st-ease) 60ms both; }
+  .chat-suggest { animation: st-rise 420ms var(--st-ease) both; }
+  .chat-suggest:nth-child(1) { animation-delay: 140ms; }
+  .chat-suggest:nth-child(2) { animation-delay: 200ms; }
+  .chat-suggest:nth-child(3) { animation-delay: 260ms; }
+  /* 新消息浮上来；Vue 按 key 复用节点，所以只有新出现的那条会播 */
+  .st-msg { animation: st-rise 280ms var(--st-ease) both; }
+  /* 侧栏导航依次淡入 */
+  .side__nav-item { animation: st-rise 360ms var(--st-ease) both; }
+  .side__nav-item:nth-child(1) { animation-delay: 20ms; }
+  .side__nav-item:nth-child(2) { animation-delay: 60ms; }
+  .side__nav-item:nth-child(3) { animation-delay: 100ms; }
+  .side__nav-item:nth-child(4) { animation-delay: 140ms; }
+  /* 切换视图时整块淡入 */
+  .view--monitor, .view--about { animation: st-appear 260ms var(--st-ease) both; }
+}
+.st-msg { width: 100%; }
+.st-msg--assistant { align-self: flex-start; }
+/* overflow-wrap:anywhere 两边都要有（原来只有用户那侧）：模型回答里一个不换行的长串
+   —— 长 URL、base64、连续符号 —— 会把 min-content 顶到几百 px，整页跟着被撑宽（实测 752px）。
+   anywhere 还同时把「内在最小宽」算小，flex 子项才可能真的收缩。 */
+.st-msg--assistant .st-bubble { width: 100%; overflow-wrap: anywhere; }
+.st-msg--user .st-bubble { white-space: pre-wrap; overflow-wrap: anywhere; }
+.st-bubble > :first-child { margin-top: 0; }
+.st-bubble > :last-child { margin-bottom: 0; }
+.st-bubble p, .st-bubble ul, .st-bubble ol { margin: 0 0 var(--st-s-3); }
+.st-bubble ul, .st-bubble ol { padding-left: var(--st-s-6); }
+.st-bubble li + li { margin-top: var(--st-s-1); }
+.st-bubble h3 { font-size: var(--st-fs-lg); margin: var(--st-s-4) 0 var(--st-s-2); color: var(--st-ink); }
+.st-bubble h4 { font-size: var(--st-fs-base); margin: var(--st-s-3) 0 var(--st-s-2); color: var(--st-ink); }
+.st-bubble code.inline { font: 400 .9em var(--st-font-mono); background: var(--st-surface-2); border: 1px solid var(--st-line-soft);
+                         border-radius: 6px; padding: 1px 5px; }
+.st-bubble .st-code { margin: var(--st-s-3) 0; }
+.st-bubble blockquote { margin: 0 0 var(--st-s-3); padding-left: var(--st-s-3); border-left: 3px solid var(--st-line);
+                        color: var(--st-ink-muted); }
+.st-bubble hr { border: 0; border-top: 1px solid var(--st-line); margin: var(--st-s-4) 0; }
+/* 模型给的宽表格：让它自己在气泡里横向滚，别把整页撑宽。
+   display:block 后表格内部仍按 table 布局排版（浏览器会给 tbody/tr 造匿名 table 包裹），
+   列还是对齐的，只是这一坨变成了一个可横向滚动的块。 */
+.st-bubble table { display: block; max-width: 100%; overflow-x: auto;
+                   border-collapse: collapse; margin: 0 0 var(--st-s-3); font-size: var(--st-fs-md); }
+/* overflow-wrap 特意用 break-word 而不是继承气泡上那条 anywhere：
+   anywhere 会**参与内在宽度计算**，宽表格就不会横向滚了、而是被压成一列一个词地咬碎。
+   break-word 不影响内在宽度 —— 该宽的表格还是宽（交给上面那条横向滚），实在放不下才断词。 */
+.st-bubble th, .st-bubble td { border: 1px solid var(--st-line); padding: 6px 10px; text-align: left;
+                              overflow-wrap: break-word; }
+.msg-images { display: flex; flex-wrap: wrap; gap: var(--st-s-2); justify-content: flex-end; }
+.msg-images img { max-width: 220px; max-height: 180px; border-radius: var(--st-r-md); border: 1px solid var(--st-line); }
+.st-msg .st-collapse { width: 100%; }
+.st-collapse__body.thinking { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 420px; overflow-y: auto; }
+.st-msg__meta .st-btn--icon { width: 28px; height: 28px; }
+.st-msg__meta .st-btn--icon .st-icon { width: 16px; height: 16px; }
+.cursor::after { content: ""; display: inline-block; width: 8px; height: 1.1em; margin-left: 2px; vertical-align: -3px;
+                 border-radius: 2px; background: var(--st-accent); animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.msg-error { color: var(--st-danger-text); background: var(--st-danger-tint); border-radius: var(--st-r-md); padding: 10px 14px;
+             font-size: var(--st-fs-md); }
+/* MCP tool calls inside an answer: one compact collapsible block per call */
+.st-bubble .tool-call { margin: var(--st-s-3) 0; }
+.tool-call > summary { min-width: 0; padding: 8px 12px; }
+.tool-call__name { font: 500 var(--st-fs-sm)/1.2 var(--st-font-mono); color: var(--st-ink); white-space: nowrap; }
+.tool-call__preview { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--st-fs-xs); }
+.tool-call .st-badge, .tool-call summary .small { flex: none; }
+.tool-call[data-state="error"] { border-color: color-mix(in srgb, var(--st-danger) 35%, var(--st-line)); }
+.tool-call[data-state="running"] .st-badge::before, .tool-call[data-state="writing"] .st-badge::before { animation: blink 1s steps(2) infinite; }
+.tool-call__label { font-size: var(--st-fs-xs); font-weight: var(--st-fw-medium); color: var(--st-ink-muted); margin: var(--st-s-2) 0 var(--st-s-1); }
+.tool-call__pre { margin: 0; padding: 10px 12px; max-height: 320px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere;
+                  font: 400 12.5px/1.5 var(--st-font-mono); color: var(--st-ink-soft); background: var(--st-surface);
+                  border: 1px solid var(--st-line-soft); border-radius: var(--st-r-sm); }
+
+.composer-wrap { flex: none; padding: 0 var(--st-s-6) var(--st-s-6); }
+.st-composer { max-width: 860px; margin: 0 auto; }
+.st-composer textarea { max-height: 40vh; }
+.st-btn--send { width: 42px; padding: 0; }
+.composer-hint { font-size: var(--st-fs-xs); color: var(--st-ink-muted); margin-right: var(--st-s-2); font-variant-numeric: tabular-nums; }
+.attachments { display: flex; flex-wrap: wrap; gap: var(--st-s-2); padding: 2px 4px 0; }
+.st-composer.dragging { outline: 2px dashed var(--st-accent); outline-offset: 3px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 6px 0 10px; border-radius: var(--st-r-pill);
+        background: var(--st-surface-2); border: 1px solid var(--st-line); font-size: var(--st-fs-xs); color: var(--st-ink-soft); }
+.chip .st-btn--icon { width: 22px; height: 22px; border-radius: 50%; }
+.chip .st-btn--icon .st-icon { width: 14px; height: 14px; }
+
+/* ---------------------------------------------------------------- monitor */
+.view--monitor, .view--about { overflow-y: auto; }
+/* 宽屏别把内容挤在中间：1240px 在 2K/4K 屏上左右各空出几百像素。改成跟着视口放，封顶 1760。 */
+.monitor, .about { max-width: min(1760px, 100%); width: 100%; margin: 0 auto; padding: var(--st-s-6); display: flex; flex-direction: column;
+                   gap: var(--st-s-5); }
+.state-card { display: flex; flex-direction: column; gap: var(--st-s-3); }
+.state-card__head { display: flex; align-items: center; gap: var(--st-s-4); flex-wrap: wrap; }
+.badges { display: flex; gap: var(--st-s-2); flex-wrap: wrap; }
+.badges .st-badge { opacity: .38; transition: opacity var(--st-dur); }
+.badges .st-badge.on { opacity: 1; }
+.state-card__row { display: flex; justify-content: space-between; gap: var(--st-s-4); font-size: var(--st-fs-sm);
+                   font-weight: var(--st-fw-medium); font-variant-numeric: tabular-nums; }
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--st-s-4); }
+.metric-card { padding: var(--st-s-4) var(--st-s-5); }
+.st-metric__value small { font-size: var(--st-fs-md); font-weight: var(--st-fw-medium); color: var(--st-ink-muted); margin-left: 4px; }
+.st-metric__sub { font-size: var(--st-fs-xs); color: var(--st-ink-muted); font-variant-numeric: tabular-nums; min-height: 1em; }
+.st-metric__spark { display: block; overflow: visible; }
+.speed-values { display: flex; justify-content: space-between; gap: var(--st-s-3); }
+.speed-values > div { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.speed-values > div:last-child { text-align: right; }
+.speed-values .st-metric__value { font-size: clamp(20px, 2.2vw, var(--st-fs-stat)); }
+.st-metric__spark .speed-prefill { color: color-mix(in srgb, var(--st-accent) 65%, black); }
+.st-metric__spark[data-tone="warn"] { color: var(--st-warn); }
+.st-metric__spark[data-tone="info"] { color: var(--st-info); }
+.monitor-row { display: grid; grid-template-columns: minmax(260px, 1fr) minmax(0, 2.4fr); gap: var(--st-s-4); }
+.ctx-card { display: flex; flex-direction: column; gap: var(--st-s-2); }
+.ctx-gauge { position: relative; width: 150px; height: 150px; margin: var(--st-s-2) auto var(--st-s-3); }
+.ctx-gauge .st-gauge { width: 150px; height: 150px; }
+.ctx-gauge .st-gauge__fill { transition: stroke-dasharray 400ms var(--st-ease); }
+.ctx-gauge__label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+                    font-size: var(--st-fs-xs); }
+.ctx-gauge__pct { font-weight: var(--st-fw-black); font-size: var(--st-fs-xl); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.bar-row { display: flex; justify-content: space-between; font-size: var(--st-fs-sm); font-weight: var(--st-fw-medium);
+           margin-top: var(--st-s-2); font-variant-numeric: tabular-nums; }
+.req-card { display: flex; flex-direction: column; gap: var(--st-s-3); min-width: 0; }
+.table-wrap { overflow-x: auto; }
+.req-head { display: flex; align-items: center; justify-content: space-between; gap: var(--st-s-2); }
+.table-wrap.all { max-height: 420px; overflow-y: auto; }
+.req-totals { margin: 0; font-size: var(--st-fs-sm); }
+.req-totals:empty { display: none; }
+.mcp-card { display: flex; flex-direction: column; gap: var(--st-s-3); }
+.mcp-server { display: flex; flex-direction: column; gap: var(--st-s-2); padding-top: var(--st-s-3); border-top: 1px solid var(--st-line-soft); }
+.mcp-server:first-child { padding-top: 0; border-top: 0; }
+.mcp-server__head { display: flex; align-items: center; gap: var(--st-s-2); flex-wrap: wrap; font-size: var(--st-fs-sm); }
+.mcp-server__tools { display: flex; flex-wrap: wrap; gap: 6px; }
+.mcp-server__tools .chip { height: 26px; padding: 0 10px; font-family: var(--st-font-mono); }
+.mcp-note { margin: 0; }
+
+/* ---------------------------------------------------------------- about */
+.about { max-width: 860px; }
+.about .st-card { display: flex; flex-direction: column; gap: var(--st-s-3); }
+.about p { margin: 0; }
+.facts { display: grid; grid-template-columns: minmax(140px, max-content) 1fr; gap: 10px var(--st-s-6); margin: 0; font-size: var(--st-fs-md); }
+.facts dt { color: var(--st-ink-muted); }
+.facts dd { margin: 0; color: var(--st-ink-soft); font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 6px;
+            overflow-wrap: anywhere; }
+.facts dd code { font: 400 13px var(--st-font-mono); }
+.facts .st-btn--icon { width: 28px; height: 28px; }
+.facts .st-btn--icon .st-icon { width: 16px; height: 16px; }
+.toggle-row { display: flex; align-items: center; justify-content: space-between; gap: var(--st-s-4); font-size: var(--st-fs-sm);
+              font-weight: var(--st-fw-medium); color: var(--st-ink-soft); }
+.toggle-row .st-toggle { flex: none; }   /* a long label must not squeeze the switch */
+
+/* ---------------------------------------------------------------- drawer */
+.st-drawer { z-index: 40; }
+.scrim { position: fixed; inset: 0; background: rgba(15, 23, 42, .18); z-index: 39; }
+.seg { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 4px; background: var(--st-surface-2);
+       border: 1px solid var(--st-line); border-radius: var(--st-r-md); }
+.seg button { height: 32px; border: 0; border-radius: 10px; background: transparent; color: var(--st-ink-muted);
+              font: 500 var(--st-fs-sm)/1 var(--st-font); cursor: pointer; }
+.seg button[aria-checked="true"] { background: var(--st-surface); color: var(--st-ink); font-weight: var(--st-fw-bold);
+                                   box-shadow: var(--st-sh-card); }
+.seg--3 { grid-template-columns: repeat(3, 1fr); }   /* 界面字体是三项，不是四项 */
+.drawer-actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--st-s-3); margin-top: var(--st-s-2); }
+.st-toast { animation: toast-in 180ms var(--st-ease); }
+@keyframes toast-in { from { opacity: 0; transform: translateY(6px); } }
+
+/* ---------------------------------------------------------------- narrow screens
+   按可用宽度分三档，目标是 390px（iPhone 14/15）上不横向溢出：
+     平板（≤1000）只是把栅格收窄；
+     竖屏手机（≤720）页头开始「只留必要的」；
+     小手机（≤560）标签页退化成纯图标。
+   页头是最先不够用的地方 —— 品牌字、状态胶囊的字、登录按钮的字，加起来比整屏还宽。 */
+@media (max-width: 1000px) {
+  .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .monitor-row { grid-template-columns: 1fr; }
+}
+@media (max-width: 720px) {
+  /* 页头**折成两行**：第一行品牌 + 状态胶囊 + 三个按钮，第二行是整行的视图标签。
+     原来全挤在一行，标签只剩下 100 多像素、4 个图标露出两个半 —— 手机上根本切不了页。
+     标签行单独占满一行之后，每个标签有 ~86px，四个都看得见、点得着。 */
+  .st-header { height: auto; flex-wrap: wrap; row-gap: 6px;
+               padding: 8px var(--st-s-3) 0; gap: var(--st-s-2); }
+  .st-header__spacer { display: none; }
+  .st-header .st-tabs { order: 9;                 /* 视觉上排到最后一行 */
+                       flex: 1 0 100%; min-width: 0; margin: 0 0 8px; }
+  /* 平分整行，跟分段控件一样 */
+  .st-tab { flex: 1 1 0; justify-content: center; padding: 0 8px; white-space: nowrap; }
+  /* 状态胶囊**保留文字**：手机上最该看到的就是生成速率。
+     窄屏由 App.vue 换成短文案（只留「85.2 tok/s」），完整说法放在 title 上。
+     nowrap 是必须的：不加的话「需要登录」会在窄页头里竖着排成三行。 */
+  .st-pill { padding: 0 10px; white-space: nowrap; flex: none; }
+  .st-signin { font-size: 0; padding: 0 12px; }
+
+  .chat { padding: var(--st-s-5) var(--st-s-4); }
+  .chat-suggests { grid-template-columns: 1fr; }
+  .composer-wrap { padding: 0 var(--st-s-3) var(--st-s-3); }
+  /* 输入条那一行原本写死 nowrap：四个图标 132 + 通道选择器 120 + 键盘提示 93 + 发送 38
+     + 间距 48 = 433px 的 min-content，390px 的屏根本放不下（整页被顶到 479px）。
+     手机上允许它换行（放不下时选择器与发送自己掉到第二行），并把「Shift+Enter：换行」
+     这条键盘提示收掉 —— 触屏上没有 Shift，它占的 93px 是最不该占的那一份。 */
+  .st-composer__bar { flex-wrap: wrap; }
+  .composer-hint { display: none; }
+  .monitor, .about { padding: var(--st-s-4); }
+  .facts { grid-template-columns: 1fr; gap: 2px; }
+  .facts dd { margin-bottom: var(--st-s-2); }
+  /* 监控页那几处（.conc-nums 等）写在 MonitorView 的 scoped 块里 ——
+     那边带 [data-v-*]，特异性比这里高，写在这儿不管用。 */
+}
+@media (max-width: 560px) {
+  /* 极窄屏标签只留图标，但**四个平分整行**：一行 4 个图标，一眼看全，也点得着。
+     （带文字的话「推理可视化」会把这一行顶出去。） */
+  .st-tab { font-size: 0; flex: 1 1 0; justify-content: center; padding: 0 6px; height: 34px; }
+}
+
+/* 表单控件默认**不继承**字体：<button>/<input>/<select> 会用浏览器 UA 字体，
+   于是卡片里的中文和标题不是同一套字（手机上还会因为系统字体不同而大小不一）。
+   一条规则统一掉，所有新老控件都跟着界面字体走。 */
+button, input, select, textarea { font-family: inherit; }
+
+/* ------------------------------------------------ 对话模式（对话 / Agent）
+   手机上这条切换是**整行分段控件**：它必须占满一行，不能挤在输入框那一行里 ——
+   之前把按钮塞进 composer bar，输入框会被压到只剩几十像素。 */
+.mode-switch { display: inline-flex; gap: 4px; padding: 3px; margin: 0 0 8px; border-radius: var(--st-r-pill);
+               background: var(--st-surface-2); border: 1px solid var(--st-line); }
+.mode-chip { height: 28px; padding: 0 14px; border: none; background: none; border-radius: var(--st-r-pill);
+             font-size: var(--st-fs-xs); font-weight: var(--st-fw-bold); color: var(--st-ink-muted); cursor: pointer;
+             transition: background var(--st-dur), color var(--st-dur); }
+.mode-chip[data-on="true"] { background: var(--st-surface); color: var(--st-ink); box-shadow: 0 1px 2px rgba(15,23,42,.12); }
+.mode-hint { margin: 0 0 6px; font-size: var(--st-fs-xs); color: var(--st-ink-muted); line-height: 1.55; }
+
+/* 手机端重新排：触控目标 ≥ 40px、输入框不因按钮出现而变窄、底部让开安全区 */
+@media (max-width: 720px) {
+  .mode-switch { display: flex; width: 100%; }
+  .mode-chip { flex: 1 1 0; height: 40px; font-size: var(--st-fs-sm); }
+
+  .composer-wrap { padding: 0 10px calc(10px + env(safe-area-inset-bottom)); }
+  .st-composer textarea { min-height: 64px; max-height: 34vh; font-size: 16px; line-height: 1.5; }
+  .st-composer__bar { gap: 6px; }
+  .st-composer__bar .st-btn--icon { width: 40px; height: 40px; flex: none; }
+  .composer-hint { display: none; }
+  .st-btn--send { width: 44px; height: 44px; flex: none; }
+  .st-composer__bar .engine-select { min-width: 0; flex: 1 1 96px; }
+
+  /* 会话栏在手机上本来就是抽屉，这里只把它给正文让出的宽度收回来 */
+  .view--chat { padding-left: 0; padding-right: 0; }
+}
+
+/* ------------------------------------------------ 生图占位（agent 调 generate_image 时） */
+.st-msg--assistant .msg-images { justify-content: flex-start; }
+/* 生图占位：小缩略框 + 右侧文字，别再占一个正方形大块 */
+.img-skeleton { display: flex; align-items: center; gap: 10px; margin: 8px 0; max-width: 380px; width: fit-content; }
+.img-skeleton__box { position: relative; width: 64px; height: 64px; min-width: 64px; aspect-ratio: auto; flex: none;
+                     border-radius: 8px; border: 1px dashed var(--st-line); background: var(--st-surface-2);
+                     overflow: hidden; }
+.img-skeleton__body { display: grid; gap: 3px; min-width: 0; }
+.img-skeleton__spinner { position: absolute; inset: 0; margin: auto; width: 22px; height: 22px; border-radius: 50%;
+                         border: 2px solid var(--st-line); border-top-color: var(--st-accent);
+                         animation: img-spin 900ms linear infinite; }
+@keyframes img-spin { to { transform: rotate(360deg); } }
+.img-skeleton__label { display: flex; align-items: center; gap: 6px; font-size: var(--st-fs-xs); flex-wrap: wrap; min-width: 0; }
+.img-skeleton__badge { display: inline-flex; align-items: center; height: 18px; padding: 0 7px; border-radius: 999px;
+                       background: var(--st-accent-tint); color: var(--st-accent-text);
+                       font-size: 11px; font-weight: var(--st-fw-bold); }
+.img-skeleton__prompt { color: var(--st-ink-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+                        max-width: 100%; }
+.img-skeleton__hint { margin: 0; color: var(--st-ink-muted); font-size: 11px; line-height: 1.4; opacity: .85; }
+
+/* 手机端：占位按屏宽收，不撑出横向滚动 */
+@media (max-width: 720px) {
+  .img-skeleton { max-width: 100%; }
+  .img-skeleton__box { width: 64px; height: 64px; }
+  .img-skeleton__spinner { width: 18px; height: 18px; }
+  .msg-images img { max-width: 100%; max-height: 46vh; }
+}
+
+/* ------------------------------------------------ 主页空态里的「模型广场」
+   主页不再只是对话框：下面直接摆出全部已部署的 AI 服务，点一张卡就地体验。 */
+.chat-empty { width: 100%; max-width: 860px; }
+.chat-empty .hub { margin-top: var(--st-s-6); text-align: left; }
+.chat-empty__hub-title { margin: var(--st-s-8) 0 var(--st-s-3); font-size: var(--st-fs-sm);
+                         font-weight: var(--st-fw-bold); color: var(--st-ink-muted); text-align: left; }
+@media (max-width: 720px) {
+  .chat-empty .hub { margin-top: var(--st-s-5); }
+  .chat-empty__hub-title { margin-top: var(--st-s-6); }
+}
+
+/* 对话页空态：回首页的入口（首页才是选择页，对话是选完之后的地方） */
+.chat-empty__back { display: inline-flex; align-items: center; gap: 6px; margin-top: var(--st-s-6);
+                    padding: 8px 14px; border: 1px solid var(--st-line); border-radius: var(--st-r-pill);
+                    background: var(--st-surface); color: var(--st-ink-muted); font-size: var(--st-fs-sm); cursor: pointer; }
+.chat-empty__back:hover { color: var(--st-ink); border-color: var(--st-accent); }

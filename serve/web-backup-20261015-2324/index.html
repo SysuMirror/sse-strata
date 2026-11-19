@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Strata</title>
+<!-- 站点图标：必须是 SVG —— 引擎对 /web/ 只服务扁平的 .css/.js/.svg（png/ico 会 404） -->
+<link rel="icon" type="image/svg+xml" href="/web/logo.svg">
+<!-- 设计系统原样保留（public/ 平铺输出，交给引擎的 /web/ 路由） -->
+<link rel="stylesheet" href="/web/tokens.css">
+<link rel="stylesheet" href="/web/components.css">
+<link rel="stylesheet" href="/web/app.css">
+<script>
+  // 首帧前定主题：用户上次的选择，其次跟随系统
+  try {
+    const t = localStorage.getItem("strata.theme") ||
+      (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.dataset.theme = t;
+  } catch (e) {}
+</script>
+  <script type="module" crossorigin src="/web/app-EFGA6qEm.js"></script>
+  <link rel="stylesheet" crossorigin href="/web/style-DmnQeBL4.css">
+</head>
+<body>
+<div id="app"></div>
+</body>
+</html>
